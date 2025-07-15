@@ -1,0 +1,33 @@
+# Node modules
+**/node_modules/
+**/dist/
+**/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv
+**/.env
+**/.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.vscode/
+.idea/
+
+# TypeScript cache
+**/*.tsbuildinfo
+
+# Output from tsc or build
+**/out/
+**/coverage/
+
+# Local environment overrides
+*.local
+
