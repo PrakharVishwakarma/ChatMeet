@@ -1,6 +1,6 @@
 // frontend/src/components/converse/Room.tsx
 
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Socket, io } from "socket.io-client";
 
@@ -171,7 +171,6 @@ export const Room = ({
 
   const handleLeaveChat = () => {
     // 1. Notify server
-    socket?.emit("leave-chat");
     socket?.disconnect();
 
     // 2. Stop media tracks
@@ -210,57 +209,181 @@ export const Room = ({
     setLobby(true); // back to waiting state
   };
 
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">🎥 Welcome, {name}</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-sky-800 opacity-30"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
-        <div className="bg-white shadow rounded-lg p-4">
-          <h3 className="text-lg font-medium mb-2 text-gray-700">📍 Local Video</h3>
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="w-full rounded-lg border"
-          />
-        </div>
+      {/* Header */}
+      <div className="relative z-10 bg-white/30 backdrop-blur-md border-b border-white/50">
+        <div className="container mx-auto px-2 py-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">ChatRio</h1>
+                <p className="text-white/70 text-sm">Welcome, {name}</p>
+              </div>
+            </div>
 
-        <div className="bg-white shadow rounded-lg p-4">
-          <h3 className="text-lg font-medium mb-2 text-gray-700">🌐 Remote Video</h3>
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-lg border"
-          />
+            {/* Connection Status */}
+            <div className="flex items-center space-x-2">
+              {!lobby && (
+                <div className="flex items-center space-x-2 bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-300 text-sm font-medium">Connected</span>
+                </div>
+              )}
+              {lobby && (
+                <div className="flex items-center space-x-2 bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/30">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <span className="text-yellow-300 text-sm font-medium">Searching...</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {lobby && (
-        <div className="mt-6 p-3 bg-yellow-100 text-yellow-800 rounded shadow text-center w-full max-w-md">
-          ⏳ Waiting to connect you to someone...
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 flex flex-col container mx-auto px-6 py-6">
+        {/* Video Grid */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Local Video */}
+          <div className="relative group">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden h-full min-h-[300px] lg:min-h-[400px]">
+              <div className="p-4 bg-white/5 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                    <h3 className="text-white font-medium">You</h3>
+                  </div>
+                  <div className="flex items-center space-x-1 text-white/60 text-sm">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Local</span>
+                  </div>
+                </div>
+              </div>
+              <div className="relative h-full">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Remote Video */}
+          <div className="relative group">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden h-full min-h-[300px] lg:min-h-[400px]">
+              <div className="p-4 bg-white/5 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${!lobby ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                    <h3 className="text-white font-medium">
+                      {!lobby ? 'Stranger' : 'Waiting...'}
+                    </h3>
+                  </div>
+                  <div className="flex items-center space-x-1 text-white/60 text-sm">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0 9c-1.657 0-3-4.03-3-9s1.343-9 3-9m0 9c1.657 0 3 4.03 3 9s-1.343 9-3 9" />
+                    </svg>
+                    <span>Remote</span>
+                  </div>
+                </div>
+              </div>
+              <div className="relative h-full">
+                {lobby ? (
+                  <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      </div>
+                      <h4 className="text-white font-medium mb-2">Finding someone...</h4>
+                      <p className="text-white/60 text-sm">We're connecting you to a stranger</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <video
+                      ref={remoteVideoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      )}
 
-      <div className="flex gap-4 mt-6">
-        <button
-          onClick={handleLeaveChat}
-          className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-md"
-        >
-          🚪 Leave Chat
-        </button>
+        {/* Waiting Message */}
+        {lobby && (
+          <div className="mb-6 flex justify-center">
+            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-md border border-yellow-500/30 rounded-xl px-6 py-4 max-w-md">
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+                <p className="text-yellow-200 font-medium">Connecting you to someone...</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-        <button
-          onClick={handleSkip}
-          className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-md shadow-md"
-        >
-          ⏭️ Skip
-        </button>
+        {/* Control Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-around gap-4">
+          <button
+            onClick={handleSkip}
+            disabled={lobby}
+            className={`group relative hover:cursor-pointer px-8 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${lobby
+                ? "bg-gray-500/30 text-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-yellow-500/25 hover:scale-105 active:scale-95"
+              }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span>Next Person</span>
+            {!lobby && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 rounded-xl"></div>
+            )}
+          </button>
+
+          <button
+            onClick={handleLeaveChat}
+            className="group relative hover:cursor-pointer px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-red-500/25 transition-all duration-300 flex items-center space-x-2 hover:scale-105 active:scale-95"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Leave Chat</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 rounded-xl"></div>
+          </button>
+        </div>
+
+        {/* Footer Info */}
+        <div className="mt-6 text-center">
+          <p className="text-white/50 text-sm">
+            Stay respectful and have fun connecting with strangers worldwide
+          </p>
+        </div>
       </div>
-
     </div>
   );
 };
-
