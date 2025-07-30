@@ -35,11 +35,6 @@ io.on("connection", (socket: Socket) => {
         console.log(`⏭️ User requested to skip: ${socket.id}`);
         userManager.skip(socket.id);
     });
-
-    socket.on("leave-chat", () => {
-        console.log(`🚪 User left chat: ${socket.id}`);
-        userManager.leaveChat(socket.id);
-    });
 });
 
 // Start server
