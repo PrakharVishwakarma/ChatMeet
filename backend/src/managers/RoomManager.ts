@@ -2,8 +2,7 @@
 
 import { User } from "./UserManager";
 
-let GLOBAL_ROOM_ID = 1;
-
+import { v4 as uuidv4 } from "uuid";
 interface Room {
     user1: User;
     user2: User;
@@ -24,7 +23,7 @@ export default class RoomManager {
             console.warn(`⚠️ Cannot create room: one or both users already in a room.`);
             return;
         }
-        const roomId = GLOBAL_ROOM_ID++;
+        const roomId = uuidv4();
         const roomKey = roomId.toString();
 
         this.rooms.set(roomKey, { user1, user2 });

@@ -1,5 +1,9 @@
+// backend/src/managers/UserManager.ts
+
 import { Socket } from "socket.io";
 import RoomManager from "./RoomManager";
+
+const SKIP_COOLDOWN_MS = Number(process.env.SKIP_COOLDOWN_MS) || 5 * 60 * 1000;
 
 export interface User {
     socket: Socket;
@@ -7,14 +11,21 @@ export interface User {
 }
 
 export class UserManager {
-    private users: Map<string, User>; 
+    private users: Map<string, User>;
     private queue: string[];
     private roomManager: RoomManager;
+    private skipHistory: Set<string>;
+
 
     constructor() {
         this.users = new Map<string, User>();
         this.queue = [];
         this.roomManager = new RoomManager();
+        this.skipHistory = new Set<string>();
+    }
+
+    private getPairKey(id1: string, id2: string): string {
+        return [id1, id2].sort().join('--');
     }
 
     addUser(name: string, socket: Socket) {
@@ -33,15 +44,35 @@ export class UserManager {
     clearQueue() {
         while (this.queue.length >= 2) {
             const id1 = this.queue.shift();
-            const id2 = this.queue.shift();
-            if (!id1 || !id2) continue;
+            if (!id1) continue;
 
-            const user1 = this.users.get(id1);
-            const user2 = this.users.get(id2);
-            if (!user1 || !user2) continue;
+            let partnerFound = false;
 
-            console.log(`🎯 Matching users → ${user1.name} (${id1}) ⇄ ${user2.name} (${id2})`);
-            this.roomManager.createRoom(user1, user2);
+            for (let i = 0; i < this.queue.length; i++) {
+                const id2 = this.queue[i];
+                const pairKey = this.getPairKey(id1, id2);
+
+                if (this.skipHistory.has(pairKey)) {
+                    continue;
+                }
+
+                this.queue.splice(i, 1);
+
+                const user1 = this.users.get(id1);
+                const user2 = this.users.get(id2);
+
+                if (user1 && user2) {
+                    this.roomManager.createRoom(user1, user2);
+                    partnerFound = true;
+                }
+                break;
+            }
+
+            if (!partnerFound) {
+                // this.queue.push(id1);
+                this.queue.unshift(id1);
+                break;
+            }
         }
     }
 
@@ -92,6 +123,14 @@ export class UserManager {
 
         const skipper = room.user1.socket.id === socketId ? room.user1 : room.user2;
         const partner = room.user1.socket.id === socketId ? room.user2 : room.user1;
+
+        const pairKey = this.getPairKey(skipper.socket.id, partner.socket.id);
+        this.skipHistory.add(pairKey);
+        setTimeout(() => {
+            this.skipHistory.delete(pairKey);
+            console.log(`[Cooldown Expired] Users can be matched again: ${pairKey}`);
+        }, SKIP_COOLDOWN_MS);
+        console.log(`[Cooldown Started] Users on cooldown for 5 mins: ${pairKey}`);
 
         this.roomManager.removeRoom(roomId);
 
