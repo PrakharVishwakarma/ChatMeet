@@ -35,13 +35,14 @@ export class UserManager {
         }
         this.users.set(socket.id, { name, socket });
         this.queue.push(socket.id);
-        socket.emit("lobby");
+        // socket.emit("lobby");
         console.log(`✅ User connected → socket ID: ${socket.id}. Queue length: ${this.queue.length}`);
         this.clearQueue();
         this.initHandlers(socket);
     }
 
     clearQueue() {
+        console.log(`🧹 Clearing queue`);
         while (this.queue.length >= 2) {
             const id1 = this.queue.shift();
             if (!id1) continue;
@@ -77,6 +78,7 @@ export class UserManager {
     }
 
     initHandlers(socket: Socket) {
+        console.log(`🔌 Initializing handlers for socket [${socket.id}]`);
         socket.on("offer", ({ sdp, roomId }: { sdp: string, roomId: string }) => {
             console.log(`📨 Received offer from socket [${socket.id}] for room [${roomId}]`);
             this.roomManager.onOffer(roomId, sdp, socket.id);
@@ -85,10 +87,10 @@ export class UserManager {
             console.log(`📨 Received answer from socket [${socket.id}] for room [${roomId}]`);
             this.roomManager.onAnswer(roomId, sdp, socket.id);
         });
-        socket.on("add-ice-candidate", ({ candidate, type, roomId }) => {
+        socket.on("add-ice-candidate", ({ candidate, roomId }) => {
             if (!candidate) return;
             console.log(`❄️ Received ICE candidate from socket [${socket.id}] in room [${roomId}]`);
-            this.roomManager.onIceCandidates(candidate, type, roomId, socket.id);
+            this.roomManager.onIceCandidates(candidate, roomId, socket.id);
         });
     }
 

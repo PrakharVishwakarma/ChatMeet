@@ -8,12 +8,17 @@ export default function Converse() {
     const [joined, setJoined] = useState(false);
     const [localAudioTrack, setLocalAudioTrack] = useState<MediaStreamTrack | null>(null);
     const [localVideoTrack, setLocalVideoTrack] = useState<MediaStreamTrack | null>(null);
-    const [camError, setCamError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     const videoRef = useRef<HTMLVideoElement>(null);
 
+    const mediaStreamRef = useRef<MediaStream | null>(null);
+
+    const [camError, setCamError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+
     const getCam = async () => {
+        console.log("🚀 LOBBY: Calling getUserMedia for camera/mic access...");
         try {
             setIsLoading(true);
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -29,6 +34,10 @@ export default function Converse() {
                 }
             });
 
+            console.log("✅ LOBBY: Camera access granted. Stream received.");
+
+            mediaStreamRef.current = stream;
+
             const videoTrack = stream.getVideoTracks()[0];
             const audioTrack = stream.getAudioTracks()[0];
 
@@ -37,7 +46,8 @@ export default function Converse() {
 
             if (videoRef.current) {
                 videoRef.current.srcObject = new MediaStream([videoTrack]);
-                videoRef.current.play();
+                videoRef.current.play().catch(e => console.error("❌ LOBBY: Local video play() failed:", e));
+                console.log("✅ LOBBY: Local video stream attached to video element.");
             }
             setCamError(null);
         } catch (err) {
@@ -49,8 +59,15 @@ export default function Converse() {
     };
 
     useEffect(() => {
-        console.log("🚀 Initializing camera...");
+        console.log("🚀 Component Mounted. Starting camera initialization.");
         getCam();
+        return () => {
+            console.log("🚀 LOBBY: Cleaning up because Converse component is unmounting.");
+
+            if (mediaStreamRef.current) {
+                mediaStreamRef.current.getTracks().forEach(track => track.stop());
+            }
+        };
     }, []);
 
     if (joined) {
