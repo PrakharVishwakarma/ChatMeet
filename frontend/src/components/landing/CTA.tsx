@@ -13,7 +13,7 @@ export const CTA = ({ onGetStarted }: CTAProps) => {
                 </h3>
 
                 <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                    Join thousands of people already connecting on ChatRio.
+                    Join thousands of people already connecting on ChatMeet.
                     Your next interesting conversation is just one click away.
                 </p>
 
@@ -65,7 +65,7 @@ export const CTA = ({ onGetStarted }: CTAProps) => {
             {/* Footer */}
             <div className="mt-16 text-center">
                 <p className="text-white/50 text-sm">
-                    © 2025 ChatRio. Connecting people, one conversation at a time.
+                    © 2025 ChatMeet. Connecting people, one conversation at a time.
                 </p>
             </div>
         </div>

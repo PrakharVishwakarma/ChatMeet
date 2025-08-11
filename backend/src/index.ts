@@ -5,6 +5,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import cors from "cors";
 import { UserManager } from "./managers/UserManager";
+import { config } from "./config";
 
 const app: Application = express();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*"
+        origin: config.corsOrigin
     }
 });
 
@@ -38,7 +39,7 @@ io.on("connection", (socket: Socket) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 server.listen(PORT, () => {
     console.log(`✅Signaling Server running on http://localhost:${PORT}`);
 });

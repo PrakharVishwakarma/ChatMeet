@@ -2,8 +2,9 @@
 
 import { Socket } from "socket.io";
 import RoomManager from "./RoomManager";
+import { config } from "../config";
 
-const SKIP_COOLDOWN_MS = Number(process.env.SKIP_COOLDOWN_MS) || 5 * 60 * 1000;
+const SKIP_COOLDOWN_MS = config.skipCooldownMs;
 
 export interface User {
     socket: Socket;
@@ -42,35 +43,26 @@ export class UserManager {
     }
 
     clearQueue() {
-        console.log(`🧹 Clearing queue`);
+        console.log(`🧹 Clearing queue of length ${this.queue.length}`);
         while (this.queue.length >= 2) {
             const id1 = this.queue.shift();
             if (!id1) continue;
 
-            let partnerFound = false;
+            const partnerIndex = this.queue.findIndex(id2 => !this.skipHistory.has(this.getPairKey(id1, id2)));
 
-            for (let i = 0; i < this.queue.length; i++) {
-                const id2 = this.queue[i];
-                const pairKey = this.getPairKey(id1, id2);
-
-                if (this.skipHistory.has(pairKey)) {
-                    continue;
-                }
-
-                this.queue.splice(i, 1);
+            if (partnerIndex !== -1) {
+                const id2 = this.queue.splice(partnerIndex, 1)[0];
 
                 const user1 = this.users.get(id1);
                 const user2 = this.users.get(id2);
 
                 if (user1 && user2) {
                     this.roomManager.createRoom(user1, user2);
-                    partnerFound = true;
+                } else {
+                    if (user1) this.queue.unshift(id1);
+                    if (user2) this.queue.unshift(id2);
                 }
-                break;
-            }
-
-            if (!partnerFound) {
-                // this.queue.push(id1);
+            } else {
                 this.queue.unshift(id1);
                 break;
             }

@@ -36,7 +36,7 @@ export const Room = ({
 
   // Use ref instead of state to avoid closure issues
   const remoteStreamRef = useRef<MediaStream>(new MediaStream());
-  const playTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // const playTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     console.log("✅ ROOM: Component Mounted.");
@@ -70,9 +70,9 @@ export const Room = ({
         console.log("  > Added track to remoteStream. Total tracks:", remoteStreamRef.current.getTracks().length);
 
         // Clear any existing timeout
-        if (playTimeoutRef.current) {
-          clearTimeout(playTimeoutRef.current);
-        }
+        // if (playTimeoutRef.current) {
+        //   clearTimeout(playTimeoutRef.current);
+        // }
 
         // Set the stream to video element with debounced play
         const setRemoteStream = () => {
@@ -81,7 +81,7 @@ export const Room = ({
             remoteVideoRef.current.srcObject = remoteStreamRef.current;
 
             // Debounce play attempts - wait for all tracks to be added
-            playTimeoutRef.current = setTimeout(() => {
+            // playTimeoutRef.current = setTimeout(() => {
               if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
                 remoteVideoRef.current.play()
                   .then(() => console.log("✅ Remote video playing successfully"))
@@ -91,7 +91,7 @@ export const Room = ({
                     }
                   });
               }
-            }, 200);
+            // }, 200);
           } else {
             console.log("  > remoteVideoRef not ready, retrying in 100ms");
             setTimeout(setRemoteStream, 100);
@@ -184,10 +184,10 @@ export const Room = ({
       }
 
       // Clear timeout
-      if (playTimeoutRef.current) {
-        clearTimeout(playTimeoutRef.current);
-        playTimeoutRef.current = null;
-      }
+      // if (playTimeoutRef.current) {
+      //   clearTimeout(playTimeoutRef.current);
+      //   playTimeoutRef.current = null;
+      // }
 
       // Reset remote stream
       remoteStreamRef.current = new MediaStream();
@@ -247,10 +247,10 @@ export const Room = ({
     }
 
     // Clear timeout
-    if (playTimeoutRef.current) {
-      clearTimeout(playTimeoutRef.current);
-      playTimeoutRef.current = null;
-    }
+    // if (playTimeoutRef.current) {
+    //   clearTimeout(playTimeoutRef.current);
+      // playTimeoutRef.current = null;
+    // }
 
     // Reset remote stream
     remoteStreamRef.current = new MediaStream();
@@ -280,7 +280,7 @@ export const Room = ({
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">ChatRio</h1>
+                <h1 className="text-xl font-bold text-white">ChatMeet</h1>
                 <p className="text-white/70 text-sm">Welcome, {name}</p>
               </div>
             </div>
@@ -446,6 +446,7 @@ export const Room = ({
     </div>
   );
 };
+
 
 /* Using Double RTCPeerConnection */
 
@@ -677,7 +678,7 @@ export const Room = ({
 //                 </svg>
 //               </div>
 //               <div>
-//                 <h1 className="text-xl font-bold text-white">ChatRio</h1>
+//                 <h1 className="text-xl font-bold text-white">ChatMeet</h1>
 //                 <p className="text-white/70 text-sm">Welcome, {name}</p>
 //               </div>
 //             </div>

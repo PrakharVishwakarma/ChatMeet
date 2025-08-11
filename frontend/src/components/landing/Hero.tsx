@@ -16,7 +16,7 @@ export const Hero = ({ onGetStarted }: HeroProps) => {
             </svg>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            ChatRio
+            ChatMeet
           </h1>
         </div>
 
